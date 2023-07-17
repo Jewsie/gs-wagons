@@ -6,14 +6,20 @@ RegisterServerEvent('gs-wagons:server:buywagon', function(name, price, model, st
     local randomLetters = string.char(math.random(65, 90), math.random(65, 90), math.random(65, 90))
     local wagonid = randomLetters .. math.random(100, 999)
     local citizenid = Player.PlayerData.citizenid
-
-    MySQL.insert('INSERT INTO `player_wagons` (citizenid, wagonid, model, name, storage, weight) VALUES (?, ?, ?, ?, ?, ?)', {
-        citizenid, wagonid, model, name, storage, weight
-    }, function(id)
-        print(id)
-    end)
-
-    Player.Functions.RemoveMoney('cash', price)
+    
+    -- Check if the player has enough money
+    if Player.Functions.GetMoney('cash') >= price then
+        MySQL.insert('INSERT INTO `player_wagons` (citizenid, wagonid, model, name, storage, weight) VALUES (?, ?, ?, ?, ?, ?)', {
+            citizenid, wagonid, model, name, storage, weight
+        }, function(id)
+            print(id)
+        end)
+        
+        Player.Functions.RemoveMoney('cash', price)
+    else
+        -- Here you could add a notification or feedback to the player that they do not have enough money
+        RSGCore.Functions.Notify('You dont have enough money!', 'error')
+    end
 end)
 
 RegisterServerEvent('gs-wagons:server:ownedwagons', function()
