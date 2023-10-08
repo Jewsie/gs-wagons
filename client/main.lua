@@ -13,6 +13,15 @@ exports('CheckActiveWagon', function()
     return spawnedWagon
 end)
 
+AddEventHandler('onResourceStop', function(resource)
+    if (GetCurrentResourceName() == resource) then
+        for k,v in pairs(npcs) do
+            DeletePed(npcs[k])
+            npcs[k] = nil
+        end
+    end
+end)
+
 RegisterNetEvent('gs-wagons:client:updatewagonid', function(wagonid, cid)
     ownedCID = cid
     print('Owned CID: ' .. ownedCID)
@@ -304,3 +313,27 @@ function HorseInventory()
     })
     TriggerEvent('inventory:client:SetCurrentStash', 'player_' .. wagonid)
 end
+
+RegisterCommand('fleewagon', function()
+    local playerPed = PlayerPedId()
+    local coords = GetEntityCoords(playerPed)
+
+    -- Replace this part with your wagon spawning logic
+    -- Example: local spawnedWagon = SpawnWagonFunction(coords)
+
+    local wagonPos = GetEntityCoords(spawnedWagon)
+    local distance = GetDistanceBetweenCoords(coords.x, coords.y, coords.z, wagonPos.x, wagonPos.y, wagonPos.z, true)
+
+    if spawnedWagon ~= nil then
+        if distance <= 10 then
+            DeleteVehicle(spawnedWagon)
+            spawnedWagon = nil
+            RSGCore.Functions.Notify('You stored your wagon!', 'success', 3000)
+            RemoveBlip(wagonBlip)
+        else
+            RSGCore.Functions.Notify('Your wagon is too far away!', 'error', 3000)
+        end
+    else
+        RSGCore.Functions.Notify('You don\'t have any wagon out!', 'error', 3000)
+    end
+end, false)
